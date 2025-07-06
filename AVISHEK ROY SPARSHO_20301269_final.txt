@@ -1,0 +1,269 @@
+;Design a base converter and implement the following conversions,
+
+;Binary to decimal
+
+;Hexadecimal to binary. 
+
+;Binary to Hexadecimal
+
+;You will have to use macros or to do these tasks. 
+
+;Steps:
+
+;Ask the user which conversion he wants to do
+
+;Take up-to 8 digit binary and 2 digit hexadecimal number as input
+
+;Show the converted number as output.
+
+
+
+
+
+
+
+;ANSWER
+
+
+
+
+
+
+.MODEL SMALL
+.STACK 100H
+.DATA
+    MSG1 DB 'Select conversion:', 0DH, 0AH
+         DB '1a.Binary to decimal', 0DH, 0AH
+         DB '2b.Hexadecimal to binary', 0DH, 0AH
+         DB '3c.Binary to Hexadecimal', 0DH, 0AH
+         DB 'Enter your choice (1-3): $'
+    MSG2 DB 0DH, 0AH, 'Enter number: $'
+    MSG3 DB 0DH, 0AH, 'Result: $'
+    MSG4 DB 0DH, 0AH, 'Invalid input! $'
+    INPUT_BUF DB 9 DUP(0)
+    OUTPUT_BUF DB 17 DUP(0)
+
+PRINT_STR MACRO STR
+    LEA DX, STR
+    MOV AH, 09H
+    INT 21H
+ENDM
+
+GET_CHAR MACRO
+    MOV AH, 01H
+    INT 21H
+ENDM
+
+.CODE
+MAIN PROC
+    MOV AX, @DATA
+    MOV DS, AX
+
+    PRINT_STR MSG1
+    GET_CHAR
+    SUB AL, '0'
+
+    CMP AL, 1
+    JE BIN_TO_DEC
+    CMP AL, 2
+    JE HEX_TO_BIN
+    CMP AL, 3
+    JE BIN_TO_HEX
+
+    PRINT_STR MSG4
+    JMP EXIT
+
+BIN_TO_DEC:
+    CALL INPUT_BINARY
+    CALL BINARY_TO_DECIMAL
+    JMP DISPLAY_RESULT
+
+HEX_TO_BIN:
+    CALL INPUT_HEX
+    CALL HEX_TO_BINARY
+    JMP DISPLAY_RESULT
+
+BIN_TO_HEX:
+    CALL INPUT_BINARY
+    CALL BINARY_TO_HEX
+    JMP DISPLAY_RESULT
+
+DISPLAY_RESULT:
+    PRINT_STR MSG3
+    PRINT_STR OUTPUT_BUF
+    JMP EXIT
+
+EXIT:
+    MOV AH, 4CH
+    INT 21H
+MAIN ENDP
+
+INPUT_BINARY PROC
+    PRINT_STR MSG2
+    LEA SI, INPUT_BUF
+    MOV CX, 8
+INPUT_BIN_LOOP:
+    GET_CHAR
+    CMP AL, 0DH
+    JE INPUT_BIN_DONE
+    CMP AL, '0'
+    JNE CHECK_ONE
+    MOV [SI], AL
+    INC SI
+    JMP INPUT_BIN_LOOP
+CHECK_ONE:
+    CMP AL, '1'
+    JNE INPUT_BIN_LOOP
+    MOV [SI], AL
+    INC SI
+    JMP INPUT_BIN_LOOP
+INPUT_BIN_DONE:
+    MOV BYTE PTR [SI], '$'
+    RET
+INPUT_BINARY ENDP
+
+INPUT_HEX PROC
+    PRINT_STR MSG2
+    LEA SI, INPUT_BUF
+    MOV CX, 2
+INPUT_HEX_LOOP:
+    GET_CHAR
+    CMP AL, 0DH
+    JE INPUT_HEX_DONE
+    MOV [SI], AL
+    INC SI
+    LOOP INPUT_HEX_LOOP
+INPUT_HEX_DONE:
+    MOV BYTE PTR [SI], '$'
+    RET
+INPUT_HEX ENDP
+;BIN To DEC
+BINARY_TO_DECIMAL PROC
+    LEA SI, INPUT_BUF
+    LEA DI, OUTPUT_BUF
+    XOR AX, AX
+    MOV CX, 8
+BIN_TO_DEC_LOOP:
+    SHL AX, 1
+    MOV BL, [SI]
+    SUB BL, '0'
+    OR AL, BL
+    INC SI
+    LOOP BIN_TO_DEC_LOOP
+    MOV CX, 0
+    MOV BX, 10
+PUSH_DIGITS:
+    XOR DX, DX
+    DIV BX
+    PUSH DX
+    INC CX
+    TEST AX, AX
+    JNZ PUSH_DIGITS
+
+POP_AND_STORE:
+    POP DX
+    ADD DL, '0'
+    MOV [DI], DL
+    INC DI
+    LOOP POP_AND_STORE
+    MOV BYTE PTR [DI], '$'
+    RET
+BINARY_TO_DECIMAL ENDP
+;HEX TO BIN
+HEX_TO_BINARY PROC
+    LEA SI, INPUT_BUF
+    LEA DI, OUTPUT_BUF
+    MOV CX, 2
+HEX_TO_BIN_LOOP:
+    MOV AL, [SI]
+    CALL HEX_CHAR_TO_BIN
+    MOV BL, 4
+HEX_CHAR_LOOP:
+    ROL AL, 1
+    MOV DL, '0'
+    JC STORE_BIT
+    JMP STORE_BIT
+STORE_BIT:
+    MOV [DI], DL
+    INC DI
+    DEC BL
+    JNZ HEX_CHAR_LOOP
+    INC SI
+    LOOP HEX_TO_BIN_LOOP
+    MOV BX, OFFSET INPUT_BUF
+    ADD BX, 2
+    CMP SI, BX
+    JE SINGLE_DIGIT
+    JMP DONE
+SINGLE_DIGIT:
+    MOV CX, 4
+    MOV AL, '0'
+ADD_ZEROS:
+    MOV [DI], AL
+    INC DI
+    LOOP ADD_ZEROS
+DONE:
+    MOV BYTE PTR [DI], '$'
+    RET 
+HEX_TO_BINARY ENDP
+;HEX To bin
+HEX_CHAR_TO_BIN PROC
+    CMP AL, '0'
+    JL HEX_CHAR_ERROR
+    CMP AL, '9'
+    JG CHECK_A_F
+    SUB AL, '0'
+    RET
+CHECK_A_F:
+    CMP AL, 'A'
+    JL HEX_CHAR_ERROR
+    CMP AL, 'F'
+    JG HEX_CHAR_ERROR
+    SUB AL, 'A'
+    ADD AL, 10
+    RET
+HEX_CHAR_ERROR:
+    MOV AL, 0
+    RET
+HEX_CHAR_TO_BIN ENDP
+;BIN TO HEX
+BINARY_TO_HEX PROC
+    LEA SI, INPUT_BUF
+    LEA DI, OUTPUT_BUF
+    XOR AX, AX
+    MOV CX, 8
+BIN_TO_HEX_LOOP:
+    SHL AX, 1
+    MOV BL, [SI]
+    SUB BL, '0'
+    OR AL, BL
+    INC SI
+    LOOP BIN_TO_HEX_LOOP
+
+    MOV CX, 0
+    MOV BX, 16
+PUSH_DIGITS_HEX:
+    XOR DX, DX
+    DIV BX
+    PUSH DX
+    INC CX
+    TEST AX, AX
+    JNZ PUSH_DIGITS_HEX
+
+POP_AND_STORE_HEX:
+    POP DX
+    CMP DX, 9
+    JLE ADD_DIGIT
+    ADD DL, 'A' - 10
+    JMP STORE_HEX
+ADD_DIGIT:
+    ADD DL, '0'
+STORE_HEX:
+    MOV [DI], DL
+    INC DI
+    LOOP POP_AND_STORE_HEX
+    MOV BYTE PTR [DI], '$'
+    RET
+BINARY_TO_HEX ENDP
+
+END MAIN
