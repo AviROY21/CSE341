@@ -1,0 +1,834 @@
+TASK1
+.MODEL SMALL
+ 
+.STACK 100H
+
+.DATA
+
+; declare variables here
+str1 db "Hello World$"
+
+
+.CODE 
+
+display macro string1 ;macro delcartaion 
+    mov ah,9
+    lea dx,string1
+    int 21h   
+endm
+
+
+MAIN PROC
+
+; initialize DS
+
+MOV AX,@DATA
+MOV DS,AX
+ 
+; enter your code here
+display str1
+
+;exit to DOS
+               
+MOV AX,4C00H
+INT 21H
+
+MAIN ENDP
+    END MAIN
+
+
+TASK3
+.MODEL SMALL
+
+
+
+
+reverse macro length 
+    mov cx, length
+    mov si, 0
+    mov ah, 1
+
+
+    start:
+    int 21h
+    mov bh, 0
+    mov bl, al
+    mov b[si], bl
+    add si, 1
+
+    loop start
+
+
+    mov cx, length
+    mov si, 0
+
+
+    medium:
+    mov bh, 0
+    mov bl, b[si]
+    push bx
+    add si, 1
+
+    loop medium 
+
+
+
+    mov cx, length
+    mov si, 0
+    mov ah, 2 
+
+    mov dl, 0ah
+    int 21h
+    mov dl, 0dh
+    int 21h
+
+
+    finish:
+    pop bx
+    mov dx, bx
+    int 21h
+
+
+    loop finish
+endm
+
+
+ 
+.STACK 3000H
+
+.DATA
+
+
+str_source dw "xyz$"
+a dw 0,1,2,3,4,5,6,7,8,9
+b db 5 dup(?)
+
+
+.CODE
+MAIN PROC
+
+;iniitialize DS
+
+MOV AX,@DATA
+MOV DS,AX
+MOV ES,AX
+ 
+; enter your code here
+
+
+
+
+
+
+reverse 6  
+
+
+
+
+ 
+
+;exit to DOS
+
+               
+MOV AX,4C00H
+INT 21H
+
+
+MAIN ENDP
+    END MAIN
+
+TASK4
+.MODEL SMALL    sdfsdsdsa
+
+
+
+
+parenthesis macro length
+    mov al, length
+    mov bh, al
+    
+    
+    mov ah, 2
+    
+    mov dl, 0ah
+    int 21h
+    
+    mov dl, 0dh
+    int 21h
+    
+    
+    mov ah, 1
+    
+    mov ch, 0
+    mov cl, bh
+    
+    
+    start:
+    int 21h
+    cmp al, 28h
+    je first_bracket
+    cmp al, 29h
+    je last_bracket
+    jmp not_found
+    first_bracket:
+    inc c 
+    jmp jump
+    last_bracket:
+    inc d
+    jump:
+    not_found:
+    
+    
+    loop start
+    
+    mov bh, 0h
+    mov bl, c
+    mov bh, d
+    cmp bl, bh
+    je worked
+    
+    
+    cmp bl, bh
+    jne failed
+    
+    
+    
+    
+    worked:
+    
+    mov ah, 2
+    mov dl, 0ah
+    int 21h
+    
+    mov dl, 0dh
+    int 21h
+    
+    lea dx, yes
+    mov ah, 9
+    int 21h
+    
+    
+    
+    jmp success
+    
+    failed:
+    
+    mov ah, 2
+    mov dl, 0ah
+    int 21h
+    
+    mov dl, 0dh
+    int 21h
+    
+    
+    lea dx, no
+    mov ah, 9
+    int 21h
+    
+    
+    
+    success:
+endm
+
+
+ 
+.STACK 3000H
+
+.DATA
+
+
+a db 1,2,3,4,5
+b db 5 dup(?)
+c db 0
+d db 0
+yes db 'Right$'
+no db 'Wrong$'
+
+
+
+.CODE
+MAIN PROC
+
+;iniitialize DS
+
+MOV AX,@DATA
+MOV DS,AX
+MOV ES,AX
+ 
+; enter your code here
+
+
+
+
+
+parenthesis 4  
+
+
+
+
+
+ 
+
+;exit to DOS
+
+               
+MOV AX,4C00H
+INT 21H
+
+
+MAIN ENDP
+    END MAIN
+
+TASK5
+.MODEL SMALL
+
+
+
+greatest macro R1, R2, R3
+    mov bl, R1
+    mov bh, R2
+    mov al, R3
+    cmp bl, bh
+    jg bl_greater
+    cmp bh, al
+    jg bh_greater_answer
+    jmp exit
+    
+    
+    
+    
+    
+    
+    bl_greater:
+    cmp bl, al
+    jg greater_1
+    jmp exit
+    
+    
+    
+    
+    greater_1:
+    mov ah, 2
+    mov dl, bl
+    add dl, 30h
+    int 21h
+    jmp done2
+    
+    bh_greater_answer:
+    mov ah, 2
+    mov dl, bh
+    add dl, 30h
+    int 21h
+    jmp done
+    
+    exit:
+    mov ah, 2
+    mov dl, al
+    add dl, 30h
+    int 21h
+     
+    
+    
+    done:
+    
+    done2:    
+endm
+
+
+ 
+.STACK 3000H
+
+.DATA
+
+
+
+
+a db 1,2,3,4,5
+b db 5 dup(?)
+
+
+
+.CODE
+MAIN PROC
+
+;iniitialize DS
+
+MOV AX,@DATA
+MOV DS,AX
+MOV ES,AX
+ 
+; enter your code here
+
+
+
+
+
+
+greatest 3, 5, -6
+
+
+
+
+
+
+ 
+
+;exit to DOS
+
+               
+MOV AX,4C00H
+INT 21H
+
+
+MAIN ENDP
+    END MAIN
+
+TASK2
+.MODEL SMALL
+
+
+
+saveReg macro R1, R2, R3
+    push R1
+    push R2
+    push R3
+endm
+
+restoreReg macro S1,S2,S3
+    pop S1
+    pop S2
+    pop S3
+endm
+
+facto macro num
+    sub al, 30h
+
+
+    mov bl, 1
+    mov dl, al
+
+
+    mov ch, 0
+    mov cl, dl
+    mov ah, 0
+
+
+    start:
+    mov ah, 0h
+    mov al, dl 
+    div bl
+    cmp ah, 0
+    jne fac
+    push bx
+    inc c
+    fac:
+    add bl, 1
+
+    loop start
+    
+    
+    mov ah, 2
+    mov dl, 0ah
+    int 21h
+    mov dl, 0dh
+    int 21h
+    
+    
+
+    mov ch, 0
+    mov cl, c
+    mov ah, 0
+
+
+
+    end:
+    mov ah, 2
+    pop dx
+    add dl, 30h
+    int 21h
+    loop end
+    endm
+
+
+ 
+.STACK 3000H
+
+.DATA
+
+
+str_source dw "xyz$"
+str_to_overwrite dw "ABC$"
+
+
+a db 1,2,3,4,5
+b db 5 dup(?)
+
+c db 0
+
+
+
+.CODE
+MAIN PROC
+
+;iniitialize DS
+
+MOV AX,@DATA
+MOV DS,AX
+MOV ES,AX
+ 
+; enter your code here
+
+
+
+mov ah, 1
+int 21h
+
+facto al
+
+
+
+
+ 
+
+;exit to DOS
+
+               
+MOV AX,4C00H
+INT 21H
+
+
+MAIN ENDP
+    END MAIN
+
+
+Task15
+.MODEL SMALL
+.STACK 100H
+
+.DATA
+arr db 'w','f','h','u','o'   
+n dw 5                      
+max_val db ?                
+message db 'The maximum character is: $'
+
+.CODE
+
+; Procedure to find the maximum between two numbers
+compare_max PROC
+    MOV AL, [SI]            
+    MOV BL, [SI+1]          
+    CMP AL, BL              
+    JGE skip_swap           
+    MOV AL, BL              
+
+skip_swap:
+    RET                     
+compare_max ENDP
+
+; Procedure to find the maximum of the entire array
+find_max PROC
+    MOV SI, 0               
+    MOV AL, [SI]            
+    MOV CX, WORD PTR n      
+    DEC CX                  
+
+max_loop:
+    CALL compare_max        
+    INC SI                  
+    LOOP max_loop           
+
+    MOV max_val, AL         
+    RET                     
+find_max ENDP
+
+; Main Program
+MAIN PROC
+
+    ; Initialize DS
+    MOV AX, @DATA
+    MOV DS, AX
+
+    ; Call the procedure to find the maximum in the array
+    CALL find_max
+
+    ; Display the result
+    MOV AH, 9               
+    LEA DX, message         
+    INT 21H                 
+
+    ; Display the maximum value found (stored in max_val)
+    MOV DL, max_val         
+    MOV AH, 2               
+    INT 21H                 
+
+    ; Exit to DOS
+    MOV AX, 4C00H
+    INT 21H
+
+MAIN ENDP
+
+END MAIN
+
+Task16
+.MODEL SMALL
+.STACK 100H
+
+.DATA
+x db 3           
+n db 4          
+result db ?      
+message db 'The result of x^n is: $'
+
+.CODE
+
+; Procedure to calculate x^n
+power PROC
+    MOV AL, x               
+    MOV CL, n               
+    MOV BL, AL              
+
+    DEC CL                  
+    JZ end_power            
+
+calc_power:
+    MUL BL                 
+    DEC CL                  
+    JNZ calc_power          
+
+end_power:
+    MOV result, AL          
+    RET                     
+power ENDP
+
+; Main program
+MAIN PROC
+
+    ; Initialize DS
+    MOV AX, @DATA
+    MOV DS, AX
+
+    ; Call the procedure to calculate x^n
+    CALL power
+
+    ; Display the result message
+    MOV AH, 9               
+    LEA DX, message         
+    INT 21H                
+
+    ; Display the result value
+    MOV DL, result         
+    ADD DL, 30H             
+    MOV AH, 2               
+    INT 21H                 
+
+    ; Exit to DOS
+    MOV AX, 4C00H
+    INT 21H
+
+MAIN ENDP
+
+END MAIN
+
+Task18
+.MODEL SMALL
+.STACK 100H
+
+.DATA
+array db 5, 10, 15, 20, 25   
+n dw 5                       
+value db 17                  
+msgFound db 'Value found in array.$'
+msgNotFound db 'Value not found in array.$'
+newline db 0Dh, 0Ah, '$'    
+
+.CODE
+
+; Procedure to check if value exists in array
+checkValue PROC
+    
+
+    ; Initialize registers
+    MOV SI, 0                 
+    MOV CX, [n]               
+    MOV BL, AL                
+
+search_loop:
+    MOV AL, [array + SI]      
+    CMP AL, BL               
+    JE found                 
+
+    INC SI                   
+    LOOP search_loop          
+
+    ; If we reach here, the value was not found
+    MOV AL, 0                
+    RET
+
+found:
+    MOV AL, 1                 
+    RET
+checkValue ENDP
+
+; Procedure to print a string
+printString PROC
+    MOV AH, 09H               
+    LEA DX, [msgFound]      
+    INT 21H                   
+    RET
+printString ENDP
+
+; Procedure to print a newline
+printNewLine PROC
+    MOV AH, 09H              
+    LEA DX, [newline]        
+    INT 21H                   
+    RET
+printNewLine ENDP
+
+; Main procedure
+MAIN PROC
+    ; Initialize data segment
+    MOV AX, @DATA
+    MOV DS, AX
+
+    ; Check if value exists in the array
+    MOV AL, value             
+    CALL checkValue           
+
+    CMP AL, 1                 
+    JE value_found           
+
+    ; Print "Value not found" message
+    LEA DX, msgNotFound      
+    MOV AH, 09H              
+    INT 21H                  
+    JMP end_program          
+
+value_found:
+    ; Print "Value found" message
+    CALL printString         
+    CALL printNewLine         
+
+end_program:
+    MOV AX, 4C00H             
+    INT 21H
+
+MAIN ENDP
+END MAIN
+
+TASK17
+.model small
+.stack 100h
+.data
+    msg db "Enter a number (0-9): $"
+    crlf db 13, 10, '$'
+    num db ?
+    prime_msg db "Prime: $"
+    
+.code
+main proc
+    ; Initialize data segment
+    mov ax, @data
+    mov ds, ax
+
+    ; Prompt user for input
+    mov ah, 09h
+    lea dx, msg
+    int 21h
+    
+    ; Read input number
+    mov ah, 01h
+    int 21h
+    sub al, '0'        
+    mov num, al
+    
+    ; Print new line
+    mov ah, 09h
+    lea dx, crlf
+    int 21h
+
+    ; Main loop to find and print primes
+    mov bl, 2           
+    
+find_next_prime:
+    cmp bl, num
+    jg done            
+
+    mov al, bl
+    call is_prime      
+    cmp al, 1           
+    jne not_prime       
+
+    ; Print prime number
+    mov ah, 09h
+    lea dx, prime_msg
+    int 21h
+    mov al, bl
+    call print_number      
+    mov ah, 09h
+    lea dx, crlf
+    int 21h
+
+not_prime:
+    inc bl             
+    jmp find_next_prime 
+done:
+    ; Exit program
+    mov ah, 4Ch
+    int 21h
+
+main endp
+
+; Procedure to check if a number is prime
+is_prime proc
+    
+
+    ; Check if number is less than 2
+    cmp bl, 2
+    jb not_prime_label
+    je is_prime_label
+
+    ; Check for factors from 2 to BL/2
+    mov cl, 2
+
+check_divisors:
+    mov al, bl
+    div cl              
+    cmp ah, 0           
+    je not_prime_label  
+
+    inc cl              
+    cmp cl, bl
+    jl check_divisors   
+
+is_prime_label:
+    mov al, 1           
+    ret
+
+not_prime_label:
+    mov al, 0           
+    ret
+
+is_prime endp
+
+; Procedure to print a number
+print_number proc
+   
+
+    ; Convert number to ASCII
+    add al, '0'
+    mov dl, al
+
+    ; Print number
+    mov ah, 02h
+    int 21h
+
+    ret
+print_number endp
+
+end main
+
+
+
+
+
